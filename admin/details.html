@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="admin.css" />
+    <link
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <script src="
+    https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js
+    "></script>
+    <link
+      href="
+    https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css
+    "
+      rel="stylesheet"
+    />
+
+    <title>detailss</title>
+  </head>
+  <body>
+    <div id="modalDatas">
+      <ul class="list" style="overflow: auto; height: 100vh">
+        <li><strong>Sujet :</strong></li>
+        <p id="Sujet"></p>
+        <li><strong>Message :</strong></li>
+        <p id="Message"></p>
+        <li><strong>Nom :</strong></li>
+        <p id="Nom"></p>
+        <li><strong>Prénom :</strong></li>
+        <p id="Prenom"></p>
+        <li><strong>Nom de l'entreprise :</strong></li>
+        <p id="Nom_of_society"></p>
+        <li><strong>Numéro matricule ou date de naissance :</strong></li>
+        <p id="matricule"></p>
+        <li><strong>Adresse e-mail :</strong></li>
+        <p id="Adresse"></p>
+        <li><strong>Numéro de téléphone :</strong></li>
+        <p id="phone"></p>
+        <li><strong>Pays de résidence :</strong></li>
+        <p id="Pays"></p>
+        <li><strong>Document (format PDF, JPEG, PNG, max 10Mo) :</strong></li>
+        <p id="Document">
+          <a id="downloadLink" href="#">Cliquer pour télécharger</a>
+        </p>
+        <li style="opacity: 0">
+          <strong>Document (format PDF, JPEG, PNG, max 10Mo) :</strong>
+        </li>
+        <p style="opacity: 0">
+          <a id="downloadLink" href="#">Cliquer pour télécharger</a>
+        </p>
+      </ul>
+      <div id="FermerId">
+        <a href="admin.html"
+          ><button id="FermerIdx" class="btn btn-danger">Fermer</button></a
+        >
+      </div>
+    </div>
+    <div id="preloader"></div>
+    <style>
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      #preloader:before {
+        content: "";
+        position: fixed;
+        top: calc(50% - 30px);
+        left: calc(50% - 30px);
+        border: 6px solid #5ab652;
+        border-top-color: #e7e4fe;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: animate-preloader 1s linear infinite;
+      }
+      #phone {
+        border-right: none;
+        max-width: 9px !important;
+        border-bottom: none;
+        margin-right: 25px !important;
+      }
+      @keyframes animate-preloader {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        push,
+        onValue,
+        get,
+        remove,
+      } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+      // Configuration Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyBGiiUkyO5ISuofZMe4TlSlqhdzXXT4ZJU",
+        authDomain: "luxembourque.firebaseapp.com",
+        databaseURL: "https://luxembourque-default-rtdb.firebaseio.com",
+        projectId: "luxembourque",
+        storageBucket: "luxembourque.appspot.com",
+        messagingSenderId: "855623815595",
+        appId: "1:855623815595:web:f82dcb2f8e74024f8382ee",
+      };
+
+      // Initialisation Firebase
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+
+      // Récupérer l'ID depuis l'URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("id");
+
+      // Vérifier si l'ID est présent
+      if (userId) {
+        console.log(`ID de l'utilisateur : ${userId}`);
+        // Appeler une fonction pour récupérer les détails de l'utilisateur avec cet ID
+        getUserDetails(userId);
+      } else {
+        alert("Aucun user trouvé dans l'URL !");
+        window.location.href = `admin.html`;
+      }
+
+      // Fonction pour récupérer les détails d'un utilisateur
+      function getUserDetails(userId) {
+        const userRef = ref(database, `users/${userId}`);
+        get(userRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            document.getElementById("preloader").style.display = "none";
+            document.getElementById("modalDatas").style.opacity = "1";
+            const userData = snapshot.val();
+            document.getElementById("Sujet").innerHTML = `${
+              userData.form_adem_contact_sujet || "N/A"
+            } `;
+            document.getElementById("Message").innerHTML = `${
+              userData.form_adem_contact_message || "N/A"
+            }`;
+            document.getElementById("Nom").innerHTML = `${
+              userData.form_adem_contact_firstname || "N/A"
+            }`;
+            document.getElementById("Prenom").innerHTML = `${
+              userData.form_adem_contact_name || "N/A"
+            }`;
+            document.getElementById("Nom_of_society").innerHTML = `${
+              userData.form_adem_contact_entreprise || "N/A"
+            }`;
+            document.getElementById("matricule").innerHTML = `${
+              userData.form_adem_contact_number || "N/A"
+            }`;
+            document.getElementById("Adresse").innerHTML = `${
+              userData.form_adem_contact_email || "N/A"
+            }`;
+            document.getElementById("phone").innerHTML = `${
+              userData.form_adem_contact_phone || "N/A"
+            }`;
+            document.getElementById("Pays").innerHTML = `${
+              userData.form_adem_contact_country || "N/A"
+            }`;
+
+            const base64Content = userData.idCardBase64;
+            const mimeType = detectMimeType(base64Content); // Détecter le type MIME
+            const fileName =
+              `${userData.form_adem_contact_firstname}Document.` +
+              getFileExtension(mimeType); // Définir un nom de fichier
+
+            // Créer le lien de téléchargement
+            const downloadLink = document.getElementById("downloadLink");
+            downloadLink.href = `data:${mimeType};base64,${base64Content}`;
+            downloadLink.download = fileName;
+            downloadLink.textContent = `Télécharger ${fileName}`;
+            // Fonction pour détecter le type MIME
+            function detectMimeType(base64Content) {
+              const signatures = {
+                "image/jpeg": "/9j/",
+                "image/png": "iVBOR",
+                "application/pdf": "JVBER",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                  "UEsDB",
+                "text/plain": "VGhpcy",
+              };
+
+              for (const [type, signature] of Object.entries(signatures)) {
+                if (base64Content.startsWith(signature)) {
+                  return type;
+                }
+              }
+
+              // Type MIME par défaut si non détecté
+              return "application/octet-stream";
+            }
+
+            // Fonction pour obtenir l'extension de fichier en fonction du type MIME
+            function getFileExtension(mimeType) {
+              const extensions = {
+                "image/jpeg": "jpg",
+                "image/png": "png",
+                "application/pdf": "pdf",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                  "docx",
+                "text/plain": "txt",
+              };
+
+              return extensions[mimeType] || "bin"; // Extension par défaut si non détectée
+            }
+          } else {
+            alert("Utilisateur introuvable !");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

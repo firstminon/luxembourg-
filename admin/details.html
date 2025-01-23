@@ -55,7 +55,13 @@
       </ul>
       <div id="FermerId">
         <a href="admin.html"
-          ><button id="FermerIdx" class="btn btn-danger">Fermer</button></a
+          ><button
+            id="FermerIdx"
+            class="btn btn-danger"
+            style="cursor: pointer"
+          >
+            Fermer
+          </button></a
         >
       </div>
     </div>
@@ -169,7 +175,7 @@
             document.getElementById("Adresse").innerHTML = `${
               userData.form_adem_contact_email || "N/A"
             }`;
-            document.getElementById("phone").innerHTML = `${
+            document.getElementById("phone").innerHTML = `+${
               userData.form_adem_contact_phone || "N/A"
             }`;
             document.getElementById("Pays").innerHTML = `${

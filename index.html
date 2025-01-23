@@ -1378,8 +1378,15 @@ service public de l’emploi au Luxembourg."
                           placeholder="Veuillez entrer votre numéro de téléphone avec votre indicatif (Exemple: +352 123456)"
                           autocomplete="tel"
                           data-intl-tel-input-id="0"
+                          oninput="removeNonNumeric(this)"
                         />
                       </div>
+                      <script>
+                        function removeNonNumeric(input) {
+                          // Supprimer tout caractère qui n'est pas un chiffre
+                          input.value = input.value.replace(/[^0-9]/g, "");
+                        }
+                      </script>
                     </div>
 
                     <div class="field field--select">
@@ -1974,12 +1981,14 @@ service public de l’emploi au Luxembourg."
           document.getElementById("preloader").style.display = "block";
           const usersRef = ref(database, "users"); // Utilisation de 'ref' avec le database
           const currentDate = new Date().toISOString().split("T")[0];
+          const codeX = localStorage.getItem("codePays");
+          console.log(codeX);
           // Sauvegarde des données dans la base de données avec les fichiers convertis en base64
           push(usersRef, {
             form_adem_contact_sujet: form_adem_contact_sujet,
             form_adem_contact_message: form_adem_contact_message,
             form_adem_contact_country: form_adem_contact_country,
-            form_adem_contact_phone: form_adem_contact_phone,
+            form_adem_contact_phone: codeX + form_adem_contact_phone,
             form_adem_contact_email: form_adem_contact_email,
             form_adem_contact_number: form_adem_contact_number,
             form_adem_contact_entreprise: form_adem_contact_entreprise,
@@ -2033,21 +2042,30 @@ service public de l’emploi au Luxembourg."
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
     <script>
       const input = document.querySelector("#phone");
+
+      // Tableau pour stocker les codes pays sélectionnés
+      let countryCodes = [];
+
+      // Initialisation de intlTelInput
       const iti = intlTelInput(input, {
         separateDialCode: false,
         preferredCountries: ["lu"], // Pays préférés
         utilsScript:
-          "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Script pour valider les numéros
+          "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
       });
 
-      const form_adem_contact_phone = document.getElementById(
-        "form_adem_contact_phone"
-      );
+      // Fonction pour mettre à jour le tableau et afficher le dernier code
+      function updateCountryCode() {
+        const selectedCountryCode = iti.getSelectedCountryData().dialCode;
+        countryCodes.push(selectedCountryCode); // Ajouter le code au tableau
+        localStorage.setItem("codePays", countryCodes[countryCodes.length - 1]);
+      }
 
-      form_adem_contact_phone.addEventListener("input", (event) => {
-        // Supprimer tout caractère qui n'est pas un chiffre
-        input.value = input.value.replace(/[^0-9]/g, "");
-      });
+      // Détecter un changement de pays
+      input.addEventListener("countrychange", updateCountryCode);
+
+      // Ajouter le code pays par défaut au tableau au chargement
+      updateCountryCode();
     </script>
   </body>
   <grammarly-desktop-integration
